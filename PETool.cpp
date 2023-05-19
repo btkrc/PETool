@@ -2,15 +2,15 @@
 #include"pch.h"
 #include"PETool.h"
 
-DWORD __stdcall PEAlign(DWORD value, DWORD size) {
-    if (value <= size) {
-        return size;
+DWORD __stdcall PEAlign(DWORD value, DWORD align) {
+    if (value <= align) {
+        return align;
     }
-    if (value > size && !(value % size)) {
+    if (value > align && !(value % align)) {
         return value;
     }
-    if (value > size && (value % size)) {
-        return value + (size - (value % size));
+    if (value > align && (value % align)) {
+        return value + (align - (value % align));
     }
 
     return NULL;

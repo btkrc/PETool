@@ -4,7 +4,7 @@
 #include<stdlib.h>
 
 /*对齐*/
-DWORD __stdcall PEAlign(DWORD value, DWORD size);
+DWORD __stdcall PEAlign(DWORD value, DWORD align);
 /*读取PE文件*/
 LPVOID __stdcall createFileBuffer(LPCTSTR fileName);
 /*创建拉伸PE文件*/
