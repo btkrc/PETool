@@ -9,3 +9,4 @@ RVA2FOA @6
 FOA2RVA @7
 getFunctionAddressByName @8
 getFunctionAddressByOrdinal @9
+addNewSection @10

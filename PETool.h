@@ -21,3 +21,5 @@ DWORD FOA2RVA(LPVOID lpBuffer, DWORD FOA);
 DWORD getFunctionAddressByName(LPVOID lpFileBuffer, LPCTSTR checkName);
 /*通过导出序号获取函数地址*/
 DWORD getFunctionAddressByOrdinal(LPVOID lpFileBuffer, DWORD checkOrdinal);
+/*按给定大小新增节，返回一个新的缓冲区*/
+LPVOID addNewSection(LPVOID lpFileBuffer, DWORD size);

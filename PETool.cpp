@@ -1,6 +1,7 @@
 #pragma once
 #include"pch.h"
 #include"PETool.h"
+#include"utils.h"
 
 DWORD __stdcall PEAlign(DWORD value, DWORD align) {
     if (value <= align) {
@@ -330,4 +331,58 @@ DWORD getFunctionAddressByOrdinal(LPVOID lpFileBuffer, DWORD checkOrdinal) {
 
     return fnAddr;
 
+}
+
+/******************
+新增节
+*/
+
+/*
+新增节表并修改属性*/
+LPVOID addNewSection(LPVOID lpFileBuffer, DWORD size) {
+
+    deleteDOSStub(lpFileBuffer);
+
+    PIMAGE_DOS_HEADER pDOS = (PIMAGE_DOS_HEADER)lpFileBuffer;
+    PIMAGE_NT_HEADERS pNT = (PIMAGE_NT_HEADERS)((DWORD)pDOS + pDOS->e_lfanew);
+    PIMAGE_FILE_HEADER pFile = (PIMAGE_FILE_HEADER)((DWORD)pNT + 4);
+    PIMAGE_OPTIONAL_HEADER pOptional = (PIMAGE_OPTIONAL_HEADER)((DWORD)pFile + 20);
+    PIMAGE_SECTION_HEADER pSections = (PIMAGE_SECTION_HEADER)((DWORD)pOptional + pFile->SizeOfOptionalHeader);
+    //定位到最后一个节头
+    PIMAGE_SECTION_HEADER pLastSection = (PIMAGE_SECTION_HEADER)((DWORD)pSections + (pFile->NumberOfSections - 1) * 40);
+
+    /*新增节的地址*/
+    PIMAGE_SECTION_HEADER pNewSection = PIMAGE_SECTION_HEADER((DWORD)pLastSection + 40);
+
+
+    memcpy(pNewSection, pLastSection, 40);
+
+    /*增加节的记数*/
+    pFile->NumberOfSections = pFile->NumberOfSections + 1;
+
+    /*修改内存和文件对齐后的大小*/
+    pNewSection->SizeOfRawData = PEAlign(size, pOptional->FileAlignment);
+    pNewSection->Misc.VirtualSize = PEAlign(size, pOptional->SectionAlignment);
+
+    /*修改地址*/
+    pNewSection->PointerToRawData =
+        PEAlign((pLastSection->PointerToRawData + pLastSection->SizeOfRawData), pOptional->FileAlignment);
+    pNewSection->VirtualAddress =
+        PEAlign((pLastSection->VirtualAddress + pLastSection->Misc.VirtualSize), pOptional->SectionAlignment);
+
+
+    /*修改包含代码段和可执行属性*/
+    pNewSection->Characteristics =
+        (pNewSection->Characteristics | IMAGE_SCN_CNT_CODE) | IMAGE_SCN_MEM_EXECUTE;
+
+    /*修改内存大小*/
+    pOptional->SizeOfImage =
+        PEAlign((pOptional->SizeOfImage + pNewSection->Misc.VirtualSize), pOptional->SectionAlignment);
+
+    /*申请新内存存放修改后的PE文件*/
+    LPVOID lpTemp = malloc(pNewSection->PointerToRawData + pNewSection->SizeOfRawData);
+    memset(lpTemp, 0, pNewSection->PointerToRawData + pNewSection->SizeOfRawData);
+    memcpy(lpTemp, lpFileBuffer, pNewSection->PointerToRawData);
+
+    return lpTemp;
 }
