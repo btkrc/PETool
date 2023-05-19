@@ -1,0 +1,11 @@
+LIBRARY
+EXPORTS
+PEAlign @1
+createFileBuffer @2
+file2Image @3
+image2File @4
+mergeSection @5
+RVA2FOA @6
+FOA2RVA @7
+getFunctionAddressByName @8
+getFunctionAddressByOrdinal @9
