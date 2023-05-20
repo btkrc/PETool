@@ -10,3 +10,7 @@ FOA2RVA @7
 getFunctionAddressByName @8
 getFunctionAddressByOrdinal @9
 addNewSection @10
+computeExportSize @11
+moveExportDir @12
+computeRelocSize @13
+moveRelocDir @14

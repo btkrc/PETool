@@ -351,6 +351,12 @@ LPVOID addNewSection(LPVOID lpFileBuffer, DWORD size) {
     //定位到最后一个节头
     PIMAGE_SECTION_HEADER pLastSection = (PIMAGE_SECTION_HEADER)((DWORD)pSections + (pFile->NumberOfSections - 1) * 40);
 
+    /*计算节表后的空白区*/
+    DWORD dwSpace = ((DWORD)pDOS + pOptional->SizeOfHeaders) - ((DWORD)pLastSection + 40);
+    if (dwSpace < 80) {
+        return NULL;
+    }
+
     /*新增节的地址*/
     PIMAGE_SECTION_HEADER pNewSection = PIMAGE_SECTION_HEADER((DWORD)pLastSection + 40);
 
@@ -386,3 +392,5 @@ LPVOID addNewSection(LPVOID lpFileBuffer, DWORD size) {
 
     return lpTemp;
 }
+
+

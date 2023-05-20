@@ -1,7 +1,7 @@
 #include"pch.h"
 #include"utils.h"
 /*功能函数，抹除DOS Stub用于新增节*/
-BOOL deleteDOSStub(LPVOID lpFileBuffer) {
+DWORD deleteDOSStub(LPVOID lpFileBuffer) {
     PIMAGE_DOS_HEADER pDOS = (PIMAGE_DOS_HEADER)lpFileBuffer;
     PIMAGE_NT_HEADERS pNT = (PIMAGE_NT_HEADERS)((DWORD)pDOS + pDOS->e_lfanew);
     PIMAGE_FILE_HEADER pFile = (PIMAGE_FILE_HEADER)((DWORD)pNT + 4);
@@ -10,6 +10,10 @@ BOOL deleteDOSStub(LPVOID lpFileBuffer) {
     //定位到最后一个节头
     PIMAGE_SECTION_HEADER pLastSection = (PIMAGE_SECTION_HEADER)((DWORD)pSections + (pFile->NumberOfSections - 1) * 40);
 
+    /*已经修改过直接返回*/
+    if (pDOS->e_lfanew == 0x40) {
+        return 1;
+    }
 
     /*
     *****************************
@@ -40,6 +44,6 @@ BOOL deleteDOSStub(LPVOID lpFileBuffer) {
 
     free(lpTemp);
 
-    return TRUE;
+    return 0;
 
 }

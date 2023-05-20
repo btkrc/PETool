@@ -2,6 +2,7 @@
 #include<windows.h>
 #include<iostream>
 #include<stdlib.h>
+#include"PEDir.h"
 
 /*¶ÔÆë*/
 DWORD __stdcall PEAlign(DWORD value, DWORD align);

@@ -8,4 +8,4 @@
 *******************************************/
 
 /*功能函数，抹除DOS Stub用于新增节*/
-BOOL deleteDOSStub(LPVOID lpFileBuffer);
+DWORD deleteDOSStub(LPVOID lpFileBuffer);
