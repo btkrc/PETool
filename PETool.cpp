@@ -53,6 +53,39 @@ LPVOID __stdcall createFileBuffer(LPCTSTR fileName) {
     return lpFileBuffer;
 }
 
+DWORD __stdcall saveFileBuffer(LPCTSTR fileName, LPVOID lpFileBuffer) {
+    PIMAGE_DOS_HEADER pDos =
+        (PIMAGE_DOS_HEADER)lpFileBuffer;
+    PIMAGE_NT_HEADERS pNT =
+        (PIMAGE_NT_HEADERS)((DWORD)lpFileBuffer + pDos->e_lfanew);
+    PIMAGE_FILE_HEADER pFile =
+        (PIMAGE_FILE_HEADER)((DWORD)pNT + 4);
+    PIMAGE_OPTIONAL_HEADER pOption =
+        (PIMAGE_OPTIONAL_HEADER)((DWORD)pFile + IMAGE_SIZEOF_FILE_HEADER);
+    PIMAGE_SECTION_HEADER pFirstSection =
+        (PIMAGE_SECTION_HEADER)((DWORD)pOption + pFile->SizeOfOptionalHeader);
+    //定位到最后一个节头
+    PIMAGE_SECTION_HEADER pLastSection = (PIMAGE_SECTION_HEADER)((DWORD)pFirstSection + (pFile->NumberOfSections - 1) * 40);
+
+    FILE *fp;
+    fopen_s(&fp, fileName, "wb+");
+    if (!fp) {
+        printf("fopen error\n");
+        return 1;
+    }
+
+    fseek(fp, 0, SEEK_SET);
+
+    DWORD count = fwrite(lpFileBuffer, pLastSection->PointerToRawData + pLastSection->SizeOfRawData, 1, fp);
+
+    if (count) {
+        return 0;
+    }
+
+    fclose(fp);
+
+}
+
 LPVOID __stdcall file2Image(LPVOID lpFileBuffer, DWORD *pdwBufferSize) {
     PIMAGE_DOS_HEADER pDos =
         (PIMAGE_DOS_HEADER)lpFileBuffer;
@@ -175,7 +208,7 @@ LPVOID __stdcall mergeSection(LPVOID lpImageBuffer) {
 }
 
 
-DWORD RVA2FOA(LPVOID lpBuffer, DWORD RVA) {
+DWORD __stdcall RVA2FOA(LPVOID lpBuffer, DWORD RVA) {
     PIMAGE_DOS_HEADER pDos =
         (PIMAGE_DOS_HEADER)lpBuffer;
     PIMAGE_NT_HEADERS pNT =
@@ -220,7 +253,7 @@ DWORD RVA2FOA(LPVOID lpBuffer, DWORD RVA) {
 
 }
 
-DWORD FOA2RVA(LPVOID lpBuffer, DWORD FOA) {
+DWORD __stdcall FOA2RVA(LPVOID lpBuffer, DWORD FOA) {
     PIMAGE_DOS_HEADER pDos =
         (PIMAGE_DOS_HEADER)lpBuffer;
     PIMAGE_NT_HEADERS pNT =
@@ -262,7 +295,7 @@ DWORD FOA2RVA(LPVOID lpBuffer, DWORD FOA) {
 }
 
 
-DWORD getFunctionAddressByName(LPVOID lpFileBuffer, LPCTSTR checkName) {
+DWORD __stdcall getFunctionAddressByName(LPVOID lpFileBuffer, LPCTSTR checkName) {
     PIMAGE_DOS_HEADER pDos =
         (PIMAGE_DOS_HEADER)lpFileBuffer;
     PIMAGE_NT_HEADERS pNT =
@@ -298,7 +331,7 @@ DWORD getFunctionAddressByName(LPVOID lpFileBuffer, LPCTSTR checkName) {
     return 0;
 }
 
-DWORD getFunctionAddressByOrdinal(LPVOID lpFileBuffer, DWORD checkOrdinal) {
+DWORD __stdcall getFunctionAddressByOrdinal(LPVOID lpFileBuffer, DWORD checkOrdinal) {
     PIMAGE_DOS_HEADER pDos =
         (PIMAGE_DOS_HEADER)lpFileBuffer;
     PIMAGE_NT_HEADERS pNT =
@@ -339,7 +372,7 @@ DWORD getFunctionAddressByOrdinal(LPVOID lpFileBuffer, DWORD checkOrdinal) {
 
 /*
 新增节表并修改属性*/
-LPVOID addNewSection(LPVOID lpFileBuffer, DWORD size) {
+LPVOID __stdcall addNewSection(LPVOID lpFileBuffer, DWORD size) {
 
     deleteDOSStub(lpFileBuffer);
 
