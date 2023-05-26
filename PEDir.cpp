@@ -162,13 +162,20 @@ DWORD moveRelocDir(LPVOID lpFileBuffer, DWORD sectionIndex, DWORD writeOffSet) {
     PIMAGE_BASE_RELOCATION pRelocFileOffset =
         (PIMAGE_BASE_RELOCATION)(RVA2FOA(lpFileBuffer, (DWORD)pReloc.VirtualAddress) + (DWORD)lpFileBuffer);
 
-    PBYTE pNewRelocFileOffset = (PBYTE)(pWriteSection->PointerToRawData + (DWORD)lpFileBuffer + writeOffSet);
+    /*新的重定位表地址*/
+    DWORD pNewRelocFileOffset = pWriteSection->PointerToRawData + (DWORD)lpFileBuffer + writeOffSet;
+
+
     for (int i = 0; pRelocFileOffset->VirtualAddress; i++) {
         DWORD blockSize = pRelocFileOffset->SizeOfBlock;
-        memcpy(pNewRelocFileOffset, pRelocFileOffset, blockSize);
+        memcpy((LPVOID)pNewRelocFileOffset, pRelocFileOffset, blockSize);
         pRelocFileOffset = (PIMAGE_BASE_RELOCATION)((DWORD)pRelocFileOffset + blockSize);
         pNewRelocFileOffset += blockSize;
     }
+
+    /*将新的地址转为RVA用以修复目录项*/
+    pOption->DataDirectory[5].VirtualAddress =
+        FOA2RVA(lpFileBuffer, pWriteSection->PointerToRawData + writeOffSet);
 
     return 0;
 }
