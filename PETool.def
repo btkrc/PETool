@@ -14,3 +14,4 @@ computeExportSize @11
 moveExportDir @12
 computeRelocSize @13
 moveRelocDir @14
+saveFileBuffer @15
